@@ -48,8 +48,8 @@ pipeline {
                           -Dsonar.projectKey=Sonar-cve-s/
                           -Dsonar.projectName='Sonar-cve's'/
                           -Dsonar.host.url=http://localhost:9000/
-                          -Dsonar.sources=src/main/java
-                          -Dsonar.inclusions=src/main/java/com/example/**/*.java
+                          -Dsonar.sources=src/main/java/
+                          -Dsonar.inclusions=src/main/java/com/example/**/*.java/
                           -Dsonar.token=sqp_b08b8163f360aa6cb24534b5c579de0a58f6211f
                         """
                     }
