@@ -2,7 +2,7 @@ import os
 import re
 
 # Path to the folder containing all vulnerable .java files
-SOURCE_DIR = "src/main/java/com/example"
+SOURCE_DIR = "src/main/java/com/example/ ."
 
 # CVE-safe command wrapper
 SAFE_COMMAND = '''\
