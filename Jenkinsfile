@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ahmadk18361/sonar-java-demo-2.git'
+                git 'https://github.com/ahmadk18361/sonar-java-demo-2.git', branch: 'main'
             }
         }
         
