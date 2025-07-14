@@ -43,6 +43,7 @@ pipeline {
            steps {
                withCredentials([string(credentialsId: '2ndsonar', variable: 'SONAR_TOKEN')]) {
                    bat 'echo Debug: token is %SONAR_TOKEN%'
+                   bact 'git status'
                }
            }
        }
