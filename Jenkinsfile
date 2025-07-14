@@ -10,21 +10,22 @@ pipeline {
         SONARQUBE_SERVER = 'Sonar-cve's' // Must match Jenkins config name exactly
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/ahmadk18361/sonar-java-demo-2.git', branch: 'main'
-            }
+    stage('Checkout') {
+          steps {
+            checkout([$class: 'GitSCM',
+              branches: [[name: '*/main']],
+              userRemoteConfigs: [[url: 'https://github.com/ahmadk18361/sonar-java-demo-2.git']],
+              extensions: [[$class: 'CloneOption', noTags: false, shallow: false, depth: 0]]
+            ])
+          }
         }
+
         
         stage('Remediate Vulnerabilities') {
             steps {
                 bat 'remediation_cve_2019_0232.py src/main/java/com/example/TomcatCVE2019_0232Example.java'
                 bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionBufferedReader.java'
-                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionArgsExample.java'
-
-
-                
+                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionArgsExample.java'                
             }
         }
 
