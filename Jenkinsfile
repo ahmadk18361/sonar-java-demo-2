@@ -33,7 +33,7 @@ pipeline {
                 dir('project1') {
                     bat 'git config --global user.email "scanner@example.com"'
                     bat 'git config --global user.name "CVE Scanner Bot"'
-                    bat 'git add .'
+                    bat 'git add Module1/src/main/java/com/example/*.java'
                     bat 'git commit -m "Committing all remediated CVE Java files" || echo "Nothing to commit"'
                 }
             }
