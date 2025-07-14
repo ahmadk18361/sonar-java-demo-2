@@ -19,7 +19,12 @@ pipeline {
         
         stage('Remediate Vulnerabilities') {
             steps {
-                bat 'remediation_cve_2019_0232.py'
+                bat 'remediation_cve_2019_0232.py src/main/java/com/example/TomcatCVE2019_0232Example.java'
+                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionBufferedReader.java'
+                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionArgsExample.java'
+
+
+                
             }
         }
 
