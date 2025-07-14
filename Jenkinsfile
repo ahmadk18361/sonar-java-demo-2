@@ -21,23 +21,34 @@ pipeline {
         }
 
         
-        stage('Remediate Vulnerabilities') {
-            steps {
-                bat 'remediation_cve_2019_0232.py src/main/java/com/example/TomcatCVE2019_0232Example.java'
-                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionBufferedReader.java'
-                bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionArgsExample.java'                
+    stage('Remediate Vulnerabilities') {
+        steps {
+              bat 'remediation_cve_2019_0232.py src/main/java/com/example/TomcatCVE2019_0232Example.java'
+              bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionBufferedReader.java'
+              bat 'remediation_cve_2019_0232.py src/main/java/com/example/CmdInjectionArgsExample.java'                
             }
         }
-
-        stage ('Debug Sonar Token') {
+    stage('Git Commit Remediated Files') {
             steps {
-                withCredentials([string(credentialsId: '2ndsonar', variable: 'SONAR_TOKEN')]) {
-                    bat 'echo Debug: token is %SONAR_TOKEN%'
+                dir('project1') {
+                    bat 'git config --global user.email "scanner@example.com"'
+                    bat 'git config --global user.name "CVE Scanner Bot"'
+                    bat 'git add .'
+                    bat 'git commit -m "Committing all remediated CVE Java files" || echo "Nothing to commit"'
                 }
             }
         }
+
+    stage ('Debug Sonar Token') {
+           steps {
+               withCredentials([string(credentialsId: '2ndsonar', variable: 'SONAR_TOKEN')]) {
+                   bat 'echo Debug: token is %SONAR_TOKEN%'
+               }
+           }
+       }
+    
         
-        stage('SonarQube Scan') {
+    stage('SonarQube Scan') {
             steps {
                 withSonarQubeEnv("${Sonar-cve-s}") {
                     withCredentials([string(credentialsId: '2ndsonar', variable: 'SONAR_TOKEN')]) {
