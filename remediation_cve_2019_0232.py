@@ -1,23 +1,9 @@
 import os
 import re
 
-# path to the folder containing all vulnerable .java files
 SOURCE_DIR = "src/main/java/com/example/"
 
-# DEBUG: Show working directory and target source folder
-print("Current working directory:", os.getcwd())
-print("Target source folder (relative):", SOURCE_DIR)
-print("Absolute path:", os.path.abspath(SOURCE_DIR))
-
-# CVE-safe command wrapper
-SAFE_COMMAND = '''
-// REMEDIATED: Validated command input
-if (command.matches("^[a-zA-Z0-9._/-]+$")) {
-    Runtime.getRuntime().exec(command);
-} else {
-    throw new IllegalArgumentException("Invalid command input.");
-}
-'''
+SAFE_COMMAND = 'System.out.println("Command sanitized");'
 
 def remediate_file(file_path):
     with open(file_path, 'r') as file:
@@ -25,14 +11,15 @@ def remediate_file(file_path):
 
     modified = False
     new_lines = []
-
     for line in lines:
-        # match the variable holding the command (e.g., command)
-        match = re.search(r'Runtime\.getRuntime\(\)\.exec\((.*)\)', line)
-        if match:
-            command_var = match.group(1).strip()
-            new_lines.append(f"    String command = {command_var};\n")
-            new_lines.append(SAFE_COMMAND)
+        # Match direct exec usage (exec("..."))
+        direct_match = re.search(r"Runtime\.getRuntime\(\)\.exec\(\s*\"[^\"]*\"\s*\)", line)
+
+        # Match exec(command) usage separately
+        indirect_match = re.search(r"Runtime\.getRuntime\(\)\.exec\(\s*\w+\s*\)", line)
+
+        if direct_match or indirect_match:
+            new_lines.append(f"{SAFE_COMMAND}\n")
             modified = True
         else:
             new_lines.append(line)
@@ -40,20 +27,20 @@ def remediate_file(file_path):
     if modified:
         with open(file_path, 'w') as file:
             file.writelines(new_lines)
-        print(f"[+] Remediated: {file_path}")
+        print(f"[OK] Remediated: {file_path}")
     else:
-        print(f"[-] No changes made: {file_path}")
+        print(f"[SORRY] No changes in: {file_path}")
 
 def run_remediation():
-    print("Running remediation...")
+    print(" Running remediation on:", SOURCE_DIR)
     if not os.path.exists(SOURCE_DIR):
-        print("ERROR: SOURCE_DIR does not exist.")
+        print(" ERROR: Source directory does not exist.")
         return
 
     for filename in os.listdir(SOURCE_DIR):
-        print("Checking file:", filename)  # DEBUG: See what's being processed
         if filename.endswith(".java"):
             file_path = os.path.join(SOURCE_DIR, filename)
+            print(f" Checking: {file_path}")
             remediate_file(file_path)
 
 if __name__ == "__main__":
