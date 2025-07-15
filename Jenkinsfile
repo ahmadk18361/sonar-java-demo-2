@@ -48,11 +48,11 @@ pipeline {
            }
        }
     
-    stage( 'Buildwith Maven')
+    stage( 'Buildwith Maven'){
             steps {
                 bat 'mvn clean packages'
             }
-    }
+        }
         
     stage('SonarQube Scan') {
             steps {
@@ -72,5 +72,5 @@ pipeline {
                 }
             }
         }
-    }
 }
+
