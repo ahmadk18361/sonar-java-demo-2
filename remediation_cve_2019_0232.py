@@ -1,44 +1,57 @@
 import os
 import re
 
+# path to the folder containing all vulnerable .java files
 SOURCE_DIR = "src/main/java/com/example/"
 
-# Replace any input to exec(...) with this safer wrapper
-SAFE_COMMAND = (
-    'if (command.matches("^[a-zA-Z0-9_.\\\\\\-/ ]+$")) {\n'
-    '            Runtime.getRuntime().exec(command);\n'
-    '        } else {\n'
-    '            throw new IllegalArgumentException("Invalid command input.");\n'
-    '        }'
-)
+# DEBUG: Show working directory and target source folder
+print("Current working directory:", os.getcwd())
+print("Target source folder (relative):", SOURCE_DIR)
+print("Absolute path:", os.path.abspath(SOURCE_DIR))
+
+# CVE-safe command wrapper
+SAFE_COMMAND = '''
+// REMEDIATED: Validated command input
+if (command.matches("^[a-zA-Z0-9._/-]+$")) {
+    Runtime.getRuntime().exec(command);
+} else {
+    throw new IllegalArgumentException("Invalid command input.");
+}
+'''
 
 def remediate_file(file_path):
-    with open(file_path, "r") as file:
+    with open(file_path, 'r') as file:
         lines = file.readlines()
 
-    new_lines = []
     modified = False
+    new_lines = []
 
     for line in lines:
-        match = re.search(r'Runtime\.getRuntime\(\)\.exec\((.*?)\);', line)
+        # match the variable holding the command (e.g., command)
+        match = re.search(r'Runtime\.getRuntime\(\)\.exec\((.*)\)', line)
         if match:
             command_var = match.group(1).strip()
-            print(f"[DEBUG] Found vulnerable exec in {file_path}: {line.strip()}")
-
-            new_lines.append(SAFE_COMMAND + "\n")
+            new_lines.append(f"    String command = {command_var};\n")
+            new_lines.append(SAFE_COMMAND)
             modified = True
         else:
             new_lines.append(line)
 
     if modified:
-        with open(file_path, "w") as file:
+        with open(file_path, 'w') as file:
             file.writelines(new_lines)
-        print(f"[INFO] Remediated: {file_path}")
+        print(f"[+] Remediated: {file_path}")
     else:
-        print(f"[SKIPPED] No vulnerable code found in {file_path}")
+        print(f"[-] No changes made: {file_path}")
 
 def run_remediation():
+    print("Running remediation...")
+    if not os.path.exists(SOURCE_DIR):
+        print("ERROR: SOURCE_DIR does not exist.")
+        return
+
     for filename in os.listdir(SOURCE_DIR):
+        print("Checking file:", filename)  # DEBUG: See what's being processed
         if filename.endswith(".java"):
             file_path = os.path.join(SOURCE_DIR, filename)
             remediate_file(file_path)
